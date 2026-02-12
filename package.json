@@ -1,0 +1,41 @@
+{
+  "name": "kakao-signature",
+  "version": "1.0.0",
+  "description": "석주 이상룡 선생 서명 시스템",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0"
+  }
+}
+```
+
+   - **"Commit new file"** 클릭
+
+---
+
+### **방법 2: 파일 드래그 앤 드롭**
+
+1. Replit에서:
+   - `index.js` 파일 다운로드 (우클릭 → Download)
+   
+2. 메모장이나 VS Code로 `package.json` 파일 만들기:
+   - 위의 package.json 내용 복사해서 저장
+
+3. GitHub 페이지에서:
+   - **"uploading an existing file"** 링크 클릭
+   - 두 파일을 드래그해서 끌어다 놓기
+   - **"Commit changes"** 클릭
+
+---
+
+## ✅ 완료 확인
+
+파일 업로드 후 GitHub 페이지에서 이렇게 보여야 해요:
+```
+leesangyong/
+├── index.js
+└── package.json
