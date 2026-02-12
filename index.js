@@ -12,7 +12,7 @@ const KAKAO_REST_API_KEY = "90dc15b2e9fca351c3def4c77b1e963c";
 // ⚠️ Replit 주소가 나오면 여기를 수정하세요!
 // 예시: https://이상룡서명시스템.replit.app
 const REDIRECT_URI =
-  "https://5fb21ee2-bfcb-47b9-b30c-bcb248a3e835-00-4e31lf0szuqx.sisko.replit.dev/oauth/callback";
+  "https://leesangyong.onrender.com/oauth/callback";
 
 // 서명자 명단을 저장할 배열 (메모리에 임시 저장)
 let signatures = [];
