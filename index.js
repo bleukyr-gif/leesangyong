@@ -547,8 +547,11 @@ app.get("/admin", (req, res) => {
 });
 
 // 서버 시작
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 서버가 시작되었습니다!`);
   console.log(`📱 접속 주소: http://localhost:${PORT}`);
   console.log(`👨‍💼 관리자 페이지: http://localhost:${PORT}/admin`);
+  
+  // 🔷 서버 시작 시 Google Sheets에서 기존 서명 불러오기
+  await loadSignaturesFromSheet();
 });
