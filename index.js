@@ -361,6 +361,12 @@ app.get("/oauth/callback", async (req, res) => {
     signatures.push(signature);
 
     // 텍스트 파일로도 저장
+    signatures.push(signature);
+
+    // 🔷 Google Sheets에 저장
+    await addSignatureToSheet(signature);
+
+    // 텍스트 파일로도 저장 (백업용)
     const signatureText = `${signatures.length}. ${userName} (ID: ${userId}) - ${signedAt}\n`;
     fs.appendFileSync("서명명단.txt", signatureText, "utf8");
 
