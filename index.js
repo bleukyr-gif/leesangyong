@@ -13,7 +13,7 @@ const REDIRECT_URI =
   "https://leesangyong.onrender.com/oauth/callback";
 
 // 🔷 Google Sheets 설정
-const SPREADSHEET_ID = "여기에_스프레드시트_ID_입력"; // 2단계에서 복사한 ID
+const SPREADSHEET_ID = "102gF824fJ_IX3LriUMQUtjRE7wkJI_KYMWLTvvkGStU"; // 2단계에서 복사한 ID
 const SHEET_NAME = "시트1"; // 또는 시트 이름
 
 // Google Sheets API 인증
