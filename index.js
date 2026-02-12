@@ -27,6 +27,50 @@ const sheets = google.sheets({ version: "v4", auth });
 // 서명자 명단을 저장할 배열
 let signatures = [];
 
+// Google Sheets에 서명 데이터 추가하는 함수
+async function addSignatureToSheet(signature) {
+  try {
+    const values = [[
+      signatures.length,
+      signature.이름,
+      signature.카카오ID,
+      signature.서명시간
+    ]];
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!A:D`,
+      valueInputOption: "RAW",
+      resource: { values },
+    });
+
+    console.log("✅ Google Sheets에 저장 완료!");
+  } catch (error) {
+    console.error("❌ Google Sheets 저장 실패:", error.message);
+  }
+}
+
+// Google Sheets에서 기존 서명 불러오는 함수
+async function loadSignaturesFromSheet() {
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!A2:D`,
+    });
+
+    const rows = response.data.values || [];
+    signatures = rows.map(row => ({
+      이름: row[1],
+      카카오ID: row[2],
+      서명시간: row[3]
+    }));
+
+    console.log(`📊 기존 서명 ${signatures.length}개 불러옴`);
+  } catch (error) {
+    console.error("❌ Google Sheets 불러오기 실패:", error.message);
+  }
+}
+
 const express = require("express");
 const axios = require("axios");
 const fs = require("fs");
