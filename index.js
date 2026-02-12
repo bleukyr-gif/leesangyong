@@ -180,7 +180,105 @@ app.get("/oauth/callback", async (req, res) => {
       timeZone: "Asia/Seoul",
     });
 
-    // 서명자 정보 저장
+    // 🔒 중복 서명 확인
+    const alreadySigned = signatures.find(sig => sig.카카오ID === userId);
+    
+    if (alreadySigned) {
+      // 이미 서명한 경우
+      return res.send(`
+        <!DOCTYPE html>
+        <html lang="ko">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>이미 서명 완료</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: 'Malgun Gothic', sans-serif;
+              background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 20px;
+            }
+            .container {
+              background: white;
+              border-radius: 20px;
+              padding: 50px 30px;
+              max-width: 500px;
+              width: 100%;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+              text-align: center;
+            }
+            .icon {
+              font-size: 80px;
+              margin-bottom: 20px;
+            }
+            h1 {
+              color: #f5576c;
+              font-size: 28px;
+              margin-bottom: 20px;
+            }
+            .message {
+              color: #666;
+              font-size: 18px;
+              margin-bottom: 30px;
+              line-height: 1.6;
+            }
+            .info-box {
+              background: #fff5f5;
+              border-radius: 10px;
+              padding: 20px;
+              margin-bottom: 30px;
+            }
+            .info-box p {
+              color: #555;
+              margin: 10px 0;
+              font-size: 14px;
+            }
+            .btn {
+              background: #f5576c;
+              color: white;
+              border: none;
+              padding: 16px 40px;
+              border-radius: 12px;
+              font-size: 16px;
+              font-weight: bold;
+              cursor: pointer;
+              transition: all 0.3s;
+            }
+            .btn:hover {
+              background: #e0455a;
+              transform: translateY(-2px);
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="icon">⚠️</div>
+            <h1>이미 서명하셨습니다</h1>
+            <p class="message">${userName}님은 이미 서명을 완료하셨습니다</p>
+
+            <div class="info-box">
+              <p><strong>기존 서명 정보</strong></p>
+              <p>서명 시간: ${alreadySigned.서명시간}</p>
+              <p>중복 서명은 불가능합니다</p>
+            </div>
+
+            <button class="btn" onclick="window.close()">창 닫기</button>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+
+    // 서명자 정보 저장 (중복이 아닌 경우에만)
     const signature = {
       이름: userName,
       카카오ID: userId,
