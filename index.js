@@ -9,11 +9,11 @@ const PORT = 3000;
 
 // 카카오 설정
 const KAKAO_REST_API_KEY = "90dc15b2e9fca351c3def4c77b1e963c";
-const REDIRECT_URI =  "https://leesangyong.onrender.com/oauth/callback";
+const REDIRECT_URI = "https://leesangyong.onrender.com/oauth/callback";
 
-// 🔷 Google Sheets 설정
-const SPREADSHEET_ID = "102gF824fJ_IX3LriUMQUtjRE7wkJI_KYMWLTvvkGStU"; // 2단계에서 복사한 ID
-const SHEET_NAME = "시트1"; // 또는 시트 이름
+// Google Sheets 설정
+const SPREADSHEET_ID = "102gF824fJ_IX3LriUMQUtjRE7wkJI_KYMWLTvvkGStU";
+const SHEET_NAME = "시트1";
 
 // Google Sheets API 인증
 const auth = new google.auth.GoogleAuth({
@@ -26,15 +26,42 @@ const sheets = google.sheets({ version: "v4", auth });
 // 서명자 명단을 저장할 배열
 let signatures = [];
 
-// Google Sheets에 서명 데이터 추가하는 함수
+// ============================================
+// Google Sheets 함수들
+// ============================================
+
+// Google Sheets에서 기존 서명 불러오기
+async function loadSignaturesFromSheet() {
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!A2:D`,
+    });
+
+    const rows = response.data.values || [];
+    signatures = rows.map((row) => ({
+      이름: row[1] || "",
+      카카오ID: String(row[2] || ""),
+      서명시간: row[3] || "",
+    }));
+
+    console.log(`📊 Google Sheets에서 ${signatures.length}개 서명 불러옴`);
+  } catch (error) {
+    console.error("❌ Google Sheets 불러오기 실패:", error.message);
+  }
+}
+
+// Google Sheets에 새 서명 추가
 async function addSignatureToSheet(signature) {
   try {
-    const values = [[
-      signatures.length,
-      signature.이름,
-      signature.카카오ID,
-      signature.서명시간
-    ]];
+    const values = [
+      [
+        signatures.length,
+        signature.이름,
+        signature.카카오ID,
+        signature.서명시간,
+      ],
+    ];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
@@ -49,49 +76,12 @@ async function addSignatureToSheet(signature) {
   }
 }
 
-// Google Sheets에서 기존 서명 불러오는 함수
-async function loadSignaturesFromSheet() {
-  try {
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A2:D`,
-    });
-
-    const rows = response.data.values || [];
-    signatures = rows.map(row => ({
-      이름: row[1],
-      카카오ID: row[2],
-      서명시간: row[3]
-    }));
-
-    console.log(`📊 기존 서명 ${signatures.length}개 불러옴`);
-  } catch (error) {
-    console.error("❌ Google Sheets 불러오기 실패:", error.message);
-  }
-}
-
-const express = require("express");
-const axios = require("axios");
-const fs = require("fs");
-const path = require("path");
-
-const app = express();
-const PORT = 3000;
-
-// ⚠️ 여기에 카카오 REST API 키를 입력하세요!
-const KAKAO_REST_API_KEY = "90dc15b2e9fca351c3def4c77b1e963c";
-
-// ⚠️ Replit 주소가 나오면 여기를 수정하세요!
-// 예시: https://이상룡서명시스템.replit.app
-const REDIRECT_URI =
-  "https://leesangyong.onrender.com/oauth/callback";
-
-// 서명자 명단을 저장할 배열 (메모리에 임시 저장)
-let signatures = [];
-
+// ============================================
 // 메인 페이지
+// ============================================
 app.get("/", (req, res) => {
   const totalSignatures = signatures.length;
+  
   res.send(`
     <!DOCTYPE html>
     <html lang="ko">
@@ -129,12 +119,6 @@ app.get("/", (req, res) => {
           margin-bottom: 10px;
           line-height: 1.4;
         }
-        .subtitle {
-          color: #666;
-          font-size: 16px;
-          margin-bottom: 30px;
-          line-height: 1.6;
-        }
         .signature-count {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
@@ -156,6 +140,12 @@ app.get("/", (req, res) => {
         @keyframes pulse {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.05); }
+        }
+        .subtitle {
+          color: #666;
+          font-size: 16px;
+          margin-bottom: 30px;
+          line-height: 1.6;
         }
         .info-box {
           background: #f8f9fa;
@@ -205,12 +195,11 @@ app.get("/", (req, res) => {
       <div class="container">
         <h1>🇰🇷 석주 이상룡 선생<br>공적 재심사 서명운동</h1>
 
-<!-- 👇 서명 인원 표시 추가 -->
-<div class="signature-count">
-  <span class="count-number">${totalSignatures}</span>명이 서명했습니다
-</div>
+        <div class="signature-count">
+          <span class="count-number">${totalSignatures}</span>명이 서명했습니다
+        </div>
 
-<p class="subtitle">독립운동가의 위대한 발자취를 기억하고<br>올바른 평가를 위해 서명해주세요</p>
+        <p class="subtitle">독립운동가의 위대한 발자취를 기억하고<br>올바른 평가를 위해 서명해주세요</p>
 
         <div class="info-box">
           <p><strong>✅ 서명 방법:</strong></p>
@@ -240,7 +229,9 @@ app.get("/", (req, res) => {
   `);
 });
 
+// ============================================
 // 카카오 로그인 후 돌아오는 페이지
+// ============================================
 app.get("/oauth/callback", async (req, res) => {
   const code = req.query.code;
 
@@ -249,7 +240,7 @@ app.get("/oauth/callback", async (req, res) => {
   }
 
   try {
-    // 1단계: 카카오에게 "이 코드로 토큰 주세요" 요청
+    // 1단계: 카카오에게 토큰 요청
     const tokenResponse = await axios.post(
       "https://kauth.kakao.com/oauth/token",
       null,
@@ -263,7 +254,7 @@ app.get("/oauth/callback", async (req, res) => {
         headers: {
           "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
         },
-      },
+      }
     );
 
     const accessToken = tokenResponse.data.access_token;
@@ -276,16 +267,15 @@ app.get("/oauth/callback", async (req, res) => {
     });
 
     const userName = userResponse.data.kakao_account.profile.nickname;
-    const userId = userResponse.data.id;
+    const userId = String(userResponse.data.id);
     const signedAt = new Date().toLocaleString("ko-KR", {
       timeZone: "Asia/Seoul",
     });
 
-    // 🔒 중복 서명 확인
-    const alreadySigned = signatures.find(sig => sig.카카오ID === userId);
-    
+    // 중복 서명 확인
+    const alreadySigned = signatures.find((sig) => sig.카카오ID === userId);
+
     if (alreadySigned) {
-      // 이미 서명한 경우
       return res.send(`
         <!DOCTYPE html>
         <html lang="ko">
@@ -379,7 +369,7 @@ app.get("/oauth/callback", async (req, res) => {
       `);
     }
 
-    // 서명자 정보 저장 (중복이 아닌 경우에만)
+    // 서명자 정보 저장
     const signature = {
       이름: userName,
       카카오ID: userId,
@@ -388,10 +378,7 @@ app.get("/oauth/callback", async (req, res) => {
 
     signatures.push(signature);
 
-    // 텍스트 파일로도 저장
-    signatures.push(signature);
-
-    // 🔷 Google Sheets에 저장
+    // Google Sheets에 저장
     await addSignatureToSheet(signature);
 
     // 텍스트 파일로도 저장 (백업용)
@@ -503,7 +490,6 @@ app.get("/oauth/callback", async (req, res) => {
       </html>
     `);
 
-    // 콘솔에도 출력 (Replit 로그 확인용)
     console.log(`✅ 새 서명: ${userName} (총 ${signatures.length}명)`);
   } catch (error) {
     console.error("오류 발생:", error.message);
@@ -515,7 +501,9 @@ app.get("/oauth/callback", async (req, res) => {
   }
 });
 
+// ============================================
 // 서명 명단 확인 페이지
+// ============================================
 app.get("/admin", (req, res) => {
   let listHtml = "<ol>";
   signatures.forEach((sig) => {
@@ -574,12 +562,13 @@ app.get("/admin", (req, res) => {
   `);
 });
 
+// ============================================
 // 서버 시작
+// ============================================
 app.listen(PORT, async () => {
   console.log(`🚀 서버가 시작되었습니다!`);
   console.log(`📱 접속 주소: http://localhost:${PORT}`);
   console.log(`👨‍💼 관리자 페이지: http://localhost:${PORT}/admin`);
-  
-  // 🔷 서버 시작 시 Google Sheets에서 기존 서명 불러오기
+
   await loadSignaturesFromSheet();
 });
