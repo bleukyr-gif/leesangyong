@@ -91,6 +91,8 @@ let signatures = [];
 
 // 메인 페이지
 app.get("/", (req, res) => {
+  const totalSignatures = signatures.length; // 현재 서명 수
+  
   res.send(`
     <!DOCTYPE html>
     <html lang="ko">
@@ -133,6 +135,28 @@ app.get("/", (req, res) => {
           font-size: 16px;
           margin-bottom: 30px;
           line-height: 1.6;
+        }
+        .signature-count {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 15px 25px;
+          border-radius: 50px;
+          font-size: 18px;
+          font-weight: bold;
+          margin: 20px 0;
+          display: inline-block;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+          animation: pulse 2s infinite;
+        }
+        .count-number {
+          font-size: 32px;
+          font-weight: 900;
+          margin: 0 5px;
+          color: #FEE500;
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
         }
         .info-box {
           background: #f8f9fa;
@@ -181,7 +205,13 @@ app.get("/", (req, res) => {
     <body>
       <div class="container">
         <h1>🇰🇷 석주 이상룡 선생<br>공적 재심사 서명운동</h1>
-        <p class="subtitle">독립운동가의 위대한 발자취를 기억하고<br>올바른 평가를 위해 서명해주세요</p>
+
+<!-- 👇 서명 인원 표시 추가 -->
+<div class="signature-count">
+  <span class="count-number">${totalSignatures}</span>명이 서명했습니다
+</div>
+
+<p class="subtitle">독립운동가의 위대한 발자취를 기억하고<br>올바른 평가를 위해 서명해주세요</p>
 
         <div class="info-box">
           <p><strong>✅ 서명 방법:</strong></p>
