@@ -324,10 +324,10 @@ app.get("/", (req, res) => {
         <h1>🇰🇷 석주 이상룡 선생<br>공적 재심사 서명운동</h1>
 
         <div class="signature-count">
-          <span class="count-number">${totalSignatures}</span>명이 서명했습니다
+          <span class="count-number">${totalSignatures}</span>명이 참여했습니다
         </div>
 
-        <p class="subtitle">독립운동가의 위대한 발자취를 기억하고<br>올바른 평가를 위해 서명해주세요</p>
+        <p class="subtitle">석주 이상룡 선생의 업적을 기억하고<br>공적의 올바른 평가를 위해 서명에 참여해주세요</p>
 
         <!-- 접을 수 있는 역사 설명 섹션 -->
         <div class="collapsible-section">
