@@ -91,8 +91,7 @@ let signatures = [];
 
 // 메인 페이지
 app.get("/", (req, res) => {
-  const totalSignatures = signatures.length; // 현재 서명 수
-  
+  const totalSignatures = signatures.length; 
   res.send(`
     <!DOCTYPE html>
     <html lang="ko">
