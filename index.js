@@ -9,8 +9,7 @@ const PORT = 3000;
 
 // 카카오 설정
 const KAKAO_REST_API_KEY = "90dc15b2e9fca351c3def4c77b1e963c";
-const REDIRECT_URI =
-  "https://leesangyong.onrender.com/oauth/callback";
+const REDIRECT_URI =  "https://leesangyong.onrender.com/oauth/callback";
 
 // 🔷 Google Sheets 설정
 const SPREADSHEET_ID = "102gF824fJ_IX3LriUMQUtjRE7wkJI_KYMWLTvvkGStU"; // 2단계에서 복사한 ID
