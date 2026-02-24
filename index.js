@@ -433,9 +433,7 @@ app.get("/", (req, res) => {
         function toggleConsent() {
           const checkbox = document.getElementById('privacyConsent');
           const kakaoBtn = document.getElementById('kakaoBtn');
-          
-          checkbox.checked = !checkbox.checked;
-          
+                   
           if (checkbox.checked) {
             kakaoBtn.disabled = false;
           } else {
