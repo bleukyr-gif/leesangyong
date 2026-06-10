@@ -26,6 +26,9 @@ const sheets = google.sheets({ version: "v4", auth });
 // 서명자 명단을 저장할 배열
 let signatures = [];
 
+// 오프라인 서명 인원 (시트2!B1 에서 읽어옴)
+let offlineSignatures = 0;
+
 // ============================================
 // Google Sheets 함수들
 // ============================================
@@ -48,6 +51,24 @@ async function loadSignaturesFromSheet() {
     console.log(`📊 Google Sheets에서 ${signatures.length}개 서명 불러옴`);
   } catch (error) {
     console.error("❌ Google Sheets 불러오기 실패:", error.message);
+  }
+}
+
+// 시트2!B1 에서 오프라인 서명 인원 불러오기
+async function loadOfflineCount() {
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `시트2!B1`,
+    });
+
+    const value = response.data.values?.[0]?.[0];
+    offlineSignatures = parseInt(value) || 0;
+
+    console.log(`✍️ 오프라인 서명 인원: ${offlineSignatures}명`);
+  } catch (error) {
+    console.error("❌ 오프라인 인원 불러오기 실패:", error.message);
+    offlineSignatures = 0;
   }
 }
 
@@ -79,9 +100,12 @@ async function addSignatureToSheet(signature) {
 // ============================================
 // 메인 페이지
 // ============================================
-app.get("/", (req, res) => {
-  const totalSignatures = signatures.length;
-  
+app.get("/", async (req, res) => {
+  // 페이지 로드마다 오프라인 인원 최신값 반영
+  await loadOfflineCount();
+
+  const totalSignatures = signatures.length + offlineSignatures;
+
   res.send(`
     <!DOCTYPE html>
     <html lang="ko">
@@ -735,6 +759,8 @@ app.get("/oauth/callback", async (req, res) => {
 // 서명 명단 확인 페이지
 // ============================================
 app.get("/admin", (req, res) => {
+  const totalSignatures = signatures.length + offlineSignatures;
+
   let listHtml = "<ol>";
   signatures.forEach((sig) => {
     listHtml += `<li>${sig.이름} (ID: ${sig.카카오ID}) - ${sig.서명시간}</li>`;
@@ -770,6 +796,11 @@ app.get("/admin", (req, res) => {
           font-size: 24px;
           color: #667eea;
           font-weight: bold;
+          margin-bottom: 10px;
+        }
+        .count-detail {
+          font-size: 14px;
+          color: #888;
           margin-bottom: 20px;
         }
         ol {
@@ -784,8 +815,11 @@ app.get("/admin", (req, res) => {
     <body>
       <div class="container">
         <h1>📋 서명 명단</h1>
-        <div class="count">총 ${signatures.length}명이 서명했습니다</div>
-        ${signatures.length > 0 ? listHtml : "<p>아직 서명자가 없습니다.</p>"}
+        <div class="count">총 ${totalSignatures}명이 서명했습니다</div>
+        <div class="count-detail">
+          온라인 서명: ${signatures.length}명 &nbsp;|&nbsp; 수기(오프라인) 서명: ${offlineSignatures}명
+        </div>
+        ${signatures.length > 0 ? listHtml : "<p>아직 온라인 서명자가 없습니다.</p>"}
       </div>
     </body>
     </html>
@@ -801,4 +835,5 @@ app.listen(PORT, async () => {
   console.log(`👨‍💼 관리자 페이지: http://localhost:${PORT}/admin`);
 
   await loadSignaturesFromSheet();
+  await loadOfflineCount();
 });
